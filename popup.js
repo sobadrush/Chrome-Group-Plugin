@@ -99,18 +99,6 @@ document.querySelector('#cancelGroupBtn').addEventListener("click", async (e) =>
     e.preventDefault();
     e.stopPropagation();
 
-    // chrome.tabGroups.query({}, (groups) => {
-    //     groups.forEach((group) => {
-    //         console.log('Group ID:', group.id);
-    //         chrome.tabs.ungroup(group.id);
-    //     });
-    // });
-
-    // chrome.tabs.ungroup(
-    //     tabIds: number | [number, ...number[]],
-    //     callback?: function,
-    //   )
-
     await getGroupArr(); // 取得 groupArr
     groupArr.forEach(gp => {
         if (gp.tabIds.length > 0) {
@@ -119,19 +107,6 @@ document.querySelector('#cancelGroupBtn').addEventListener("click", async (e) =>
             }); 
         }
     })
-
-    // chrome.tabs.query({ currentWindow: true }, (tabs) => {
-    //     tabs.forEach((tab) => {
-    //         chrome.tabs.ungroup(tab.id, () => {
-    //             console.log('執行 ungroup');
-    //         });            
-    //         // if (tab.groupId !== -1) {
-    //         //     chrome.tabs.group({ tabIds: tab.id, createProperties: { windowId: tab.windowId } }, (group) => {
-    //         //         chrome.tabs.ungroup(group.id, () => {});
-    //         //     });
-    //         // }
-    //     });
-    // });
 });
 
 // 查詢目前設定關鍵字
@@ -159,12 +134,23 @@ document.querySelector("#queryKeywords").addEventListener("click", async (e) => 
             e.stopPropagation();
             // alert(e.target.value);
             if (confirm(`delete this value ${e.target.value}?`)) {
-                groupArr.splice(groupArr.findIndex(data => data.urlKeywords === e.target.value), 1);
-                e.target.closest("tr").remove()
+                let targetIdx = groupArr.findIndex(data => data.urlKeywords === e.target.value);
+                let targetToDel = groupArr[targetIdx];
+                groupArr.splice(targetIdx, 1);
+                e.target.closest("tr").remove();
+
+                chrome.tabs.ungroup(targetToDel.tabIds, () => {
+                    console.log('執行 ungroup');
+                }); 
 
                 // 從本地瀏覽器中刪除使用者輸入的資料
                 chrome.storage.local.remove(['myGroupArr'], () => {
                     console.log(`資料自 Chrome local storage 刪除成功`);
+                });
+
+                // 更新 groupArr，重新儲存到 chrome
+                chrome.storage.local.set({ 'myGroupArr': groupArr }, () => {
+                    console.log(`更新 groupArr，重新儲存到 chrome`, groupArr);
                 });
             }
         })
