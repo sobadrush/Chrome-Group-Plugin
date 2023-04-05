@@ -52,42 +52,67 @@ let doSaveData = (_keywords) => {
     });
 }
 
+// 重置邏輯
+let doReset = (kw) => {
+
+    if(kw) {
+        groupArr = groupArr.filter(x => x.urlKeywords === kw)
+    }
+
+    groupArr.forEach(x => {
+        // console.log('x.tabIds', x.tabIds);
+        let tabIdsArr = x.tabIds;
+        tabIdsArr.splice(0);
+    });
+    
+    // 更新 groupArr，重新儲存到 chrome
+    chrome.storage.local.set({ 'myGroupArr': groupArr }, () => {
+        console.log(`[重置按鈕] 更新 groupArr，重新儲存到 chrome`, groupArr);
+    });
+}
+
 // 綁定「新增」按鈕事件 → 注意：keypress事件無法在 chrome extension 上作用
 ['click', 'keypress'].forEach(ee => {
     let elem = document.querySelector("#addBtn");
+
     switch (ee) {
         case 'click':
             elem.addEventListener(ee, (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                
-                let kw = document.querySelector('#keywordsInp').value;
-                doSaveData(kw);
-            
-                document.querySelector('#keywordsInp').value = '';
-                document.querySelector('#keywordsInp').focus();
+                let kwStr = document.querySelector('#keywordsInp').value;
+                if(kwStr.length === 0 || /\s/.test(kwStr)){
+                    alert("請輸入字串！")
+                    return;
+                }
+                doSaveData(kwStr);
             });
             break;
         case 'keypress': // not working
             elem.addEventListener(ee, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 if (e.key === "Enter") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    let kw = document.querySelector('#keywordsInp').value;
-                    doSaveData(kw);
-                
-                    document.querySelector('#keywordsInp').value = '';
-                    document.querySelector('#keywordsInp').focus();
+                    let kwStr = document.querySelector('#keywordsInp').value;
+                    if(kwStr.length === 0 || /\s/.test(kwStr)){
+                        alert("請輸入字串！")
+                        return;
+                    }
+                    doSaveData(kwStr);
                 }
             });
             break;
     }
+    document.querySelector('#keywordsInp').value = '';
+    document.querySelector('#keywordsInp').focus();
 });
 
 // 執行按鈕
 document.querySelector('#execBtn').addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    doReset(); // 根據 keywords 清空對應的 tabIds 陣列
 
     chrome.tabs.query({ windowId: chrome.windows.WINDOW_ID_CURRENT }, (tabs) => {
         groupTabsByUrlKeywords(tabs);
@@ -107,6 +132,16 @@ document.querySelector('#cancelGroupBtn').addEventListener("click", async (e) =>
             }); 
         }
     })
+});
+
+// 重置按鈕
+document.querySelector("#resetButton").addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if(confirm("確定重置嗎？") === false){
+        return;
+    }
+    doReset();
 });
 
 // 查詢目前設定關鍵字
@@ -139,9 +174,11 @@ document.querySelector("#queryKeywords").addEventListener("click", async (e) => 
                 groupArr.splice(targetIdx, 1);
                 e.target.closest("tr").remove();
 
-                chrome.tabs.ungroup(targetToDel.tabIds, () => {
-                    console.log('執行 ungroup');
-                }); 
+                if(targetToDel.tabIds.length > 0) {
+                    chrome.tabs.ungroup(targetToDel.tabIds, () => {
+                        console.log('執行 ungroup');
+                    }); 
+                }
 
                 // 從本地瀏覽器中刪除使用者輸入的資料
                 chrome.storage.local.remove(['myGroupArr'], () => {
