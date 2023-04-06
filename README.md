@@ -1,2 +1,2 @@
 # Chrome-Group-Plugin
-這是一個可以將Chrome的Tab根據關鍵字Group的專案
+這是一個可以將 Chrome的Tab 根據關鍵字 Group 的專案
