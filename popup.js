@@ -29,7 +29,7 @@ const genRandomInt = (_min, _max) => {
 // 存儲資料到 const & chrome
 const doSaveData = (_keywords) => {
 
-    if(groupArr.find(xx => xx.urlKeywords === _keywords)){
+    if(groupArr.find(xx => xx.urlKeywords.toLowerCase() === _keywords.toLowerCase())){
         alert(`已有此關鍵字: ${_keywords}`);
         return;
     }
@@ -170,14 +170,14 @@ document.querySelector('#cancelGroupBtn').addEventListener("click", async (e) =>
 });
 
 // 重置按鈕
-document.querySelector("#resetButton").addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if(confirm("確定重置嗎？") === false){
-        return;
-    }
-    doReset();
-});
+// document.querySelector("#resetButton").addEventListener("click", (e) => {
+//     e.preventDefault();
+//     e.stopPropagation();
+//     if(confirm("確定重置嗎？") === false){
+//         return;
+//     }
+//     doReset();
+// });
 
 // 查詢目前設定關鍵字
 document.querySelector("#queryKeywords").addEventListener("click", async (e) => {
