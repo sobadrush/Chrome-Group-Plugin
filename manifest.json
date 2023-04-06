@@ -8,15 +8,15 @@
         "default_title": "I'm Chrome Group Plugin",
         "default_popup": "popup.html",
         "default_icon": {
-            "32": "images/icon-kirby-32.png",
-            "48": "images/icon-kirby-48.png",
-            "128": "images/icon-kirby-128.png"
+            "32": "images/icon-kirby-open-32.png",
+            "48": "images/icon-kirby-open-48.png",
+            "128": "images/icon-kirby-open-128.png"
         }
     },
     "icons": {
-        "32": "images/icon-kirby-32.png",
-        "48": "images/icon-kirby-48.png",
-        "128": "images/icon-kirby-128.png"
+        "32": "images/icon-kirby-open-32.png",
+        "48": "images/icon-kirby-open-48.png",
+        "128": "images/icon-kirby-open-128.png"
     },
     "background": {
         "service_worker": "background.js"
